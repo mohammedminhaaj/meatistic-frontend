@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "685068688491",
+    "project_id": "meatistic-4b215",
+    "storage_bucket": "meatistic-4b215.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:685068688491:android:263c0539b1f642d693a52e",
+        "android_client_info": {
+          "package_name": "com.example.meatistic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "685068688491-jmoftfhvobl35db9d0sahj40cm2p21pj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYHkQ-3SLtQ5wTs72tDyYWK6EAxg2Rgjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "685068688491-jmoftfhvobl35db9d0sahj40cm2p21pj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
