@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/widgets/authentication/authentication_footer.dart';
 
 class PasswordSent extends StatelessWidget {
@@ -21,9 +22,10 @@ class PasswordSent extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/password-sent.png",
-                  colorBlendMode: BlendMode.multiply,
+                SvgPicture.asset(
+                  "assets/images/password-sent.svg",
+                  height: 250,
+                  width: 250,
                 ),
                 Text(
                   "A temporary password has been sent to $email. Please use the password for logging in to your account.",

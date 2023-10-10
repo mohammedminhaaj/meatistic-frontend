@@ -26,13 +26,14 @@ class StoreAdapter extends TypeAdapter<Store> {
       userEmail: fields[5] == null ? '' : fields[5] as String,
       preferredPaymentMode: fields[6] == null ? 0 : fields[6] as int,
       fcmTokenStored: fields[7] == null ? false : fields[7] as bool,
+      mobileNumber: fields[8] == null ? '' : fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Store obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.authToken)
       ..writeByte(1)
@@ -48,7 +49,9 @@ class StoreAdapter extends TypeAdapter<Store> {
       ..writeByte(6)
       ..write(obj.preferredPaymentMode)
       ..writeByte(7)
-      ..write(obj.fcmTokenStored);
+      ..write(obj.fcmTokenStored)
+      ..writeByte(8)
+      ..write(obj.mobileNumber);
   }
 
   @override

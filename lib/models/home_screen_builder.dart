@@ -1,6 +1,7 @@
 class HomeScreenBuilder {
   HomeScreenBuilder({
     this.homeScreenUpdated = false,
+    this.pendingOrder = false,
     this.carouselImages = const [],
     this.allProducts = const [],
     this.categories = const [],
@@ -11,6 +12,7 @@ class HomeScreenBuilder {
   });
 
   final bool homeScreenUpdated;
+  final bool pendingOrder;
   final List<String> carouselImages;
   final List<dynamic> allProducts;
   final List<dynamic> categories;
@@ -21,6 +23,7 @@ class HomeScreenBuilder {
 
   HomeScreenBuilder copyWith(
       {bool? homeScreenUpdated,
+      bool? pendingOrder,
       List<String>? carouselImages,
       List<dynamic>? allProducts,
       List<dynamic>? categories,
@@ -30,6 +33,7 @@ class HomeScreenBuilder {
       List<dynamic>? topRated}) {
     return HomeScreenBuilder(
         homeScreenUpdated: homeScreenUpdated ?? this.homeScreenUpdated,
+        pendingOrder: pendingOrder ?? this.pendingOrder,
         carouselImages: carouselImages ?? this.carouselImages,
         allProducts: allProducts ?? this.allProducts,
         categories: categories ?? this.categories,

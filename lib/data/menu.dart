@@ -12,3 +12,11 @@ final List<SortMenuItem> sortMenuList = [
   SortMenuItem(name: "Newest", filterName: "new"),
   SortMenuItem(name: "A-Z", filterName: "az"),
 ];
+
+final List<SortMenuItem> vendorSortMenuList = [
+  SortMenuItem(name: "Rating: High", filterName: "rating_high"),
+  SortMenuItem(name: "Rating: Low", filterName: "rating_low"),
+  SortMenuItem(name: "Distance: Far", filterName: "distance_far"),
+  SortMenuItem(name: "Distance: Near", filterName: "distance_near"),
+  SortMenuItem(name: "A-Z", filterName: "az")
+];

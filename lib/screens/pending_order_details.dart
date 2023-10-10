@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meatistic/models/order.dart';
-import 'package:meatistic/models/vendor.dart';
 import 'package:meatistic/providers/order_provider.dart';
+import 'package:meatistic/widgets/contact_us.dart';
 import 'package:meatistic/widgets/elevated_container.dart';
 import 'package:meatistic/widgets/pending_order_status.dart';
 import 'package:meatistic/widgets/pending_order_vendor_details.dart';
@@ -18,8 +18,6 @@ class PendingOrderDetails extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AllOrders orders = ref.watch(orderProvider);
-    final List<Vendor> vendorList = [];
-    final Set<String> vendorNames = {};
 
     late final Order? order;
     try {
@@ -34,12 +32,6 @@ class PendingOrderDetails extends ConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         Navigator.of(context, rootNavigator: true).pop();
       });
-    } else {
-      for (final cart in order.cart) {
-        if (vendorNames.add(cart.product.vendor.displayName)) {
-          vendorList.add(cart.product.vendor);
-        }
-      }
     }
 
     return order != null
@@ -56,9 +48,8 @@ class PendingOrderDetails extends ConsumerWidget {
                   PendingOrderMap(
                       orderLatitude: order.latitude,
                       orderLongitude: order.longitude,
-                      vendorLtLn: vendorList
-                          .map<List<double>>((e) => [e.latitude, e.longitude])
-                          .toList()),
+                      vendorLatitude: order.cart[0].product.vendor.latitude,
+                      vendorLongitude: order.cart[0].product.vendor.longitude),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(
@@ -76,7 +67,12 @@ class PendingOrderDetails extends ConsumerWidget {
                           child: InkWell(
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(25)),
-                            onTap: () {},
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) => const ContactUs(),
+                              );
+                            },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -111,7 +107,8 @@ class PendingOrderDetails extends ConsumerWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        PendingOrderVendorDetails(vendorList: vendorList),
+                        PendingOrderVendorDetails(
+                            vendor: order.cart[0].product.vendor),
                       ],
                     ),
                   )

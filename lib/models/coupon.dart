@@ -16,7 +16,8 @@ class Coupon {
       this.discountPercentage,
       this.maxDiscountAmount,
       this.minOrderAmount,
-      this.validUntil});
+      this.validUntil,
+      this.vendor});
 
   final String code;
   final String description;
@@ -27,10 +28,16 @@ class Coupon {
   final double? minOrderAmount;
   final DateTime validFrom;
   final DateTime? validUntil;
+  final String? vendor;
   String? errorText;
 
-  bool hasErrors(double total) {
+  bool hasErrors(double total, String currentVendor) {
     final DateTime currentDateTimeUtc = DateTime.now().toUtc();
+    if (vendor != null && vendor != currentVendor) {
+      errorText = "Coupon can only be used for items from $vendor";
+      return true;
+    }
+
     if (!(validFrom.isBefore(currentDateTimeUtc) &&
         (validUntil == null ||
             (validUntil != null && validUntil!.isAfter(currentDateTimeUtc))))) {
@@ -104,5 +111,6 @@ class Coupon {
           : null,
       validUntil: json["valid_until"] != null
           ? DateTime.parse(json["discount_percentage"])
-          : null);
+          : null,
+      vendor: json["vendor"]);
 }

@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +19,14 @@ void main() async {
   Hive.registerAdapter(StoreAdapter());
   await Hive.openBox<Store>("store");
   await Firebase.initializeApp();
+  FlutterError.onError = (details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+  PlatformDispatcher.instance.onError = (exception, stackTrace) {
+    FirebaseCrashlytics.instance
+        .recordError(exception, stackTrace, fatal: true);
+    return true;
+  };
   runApp(const ProviderScope(child: App()));
 }
 
@@ -49,8 +60,8 @@ class App extends StatelessWidget {
           // This works for code too, not just values: Most code changes can be
           // tested with just a hot reload.
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 0, 90, 125),
-          ),
+              seedColor: const Color.fromARGB(255, 80, 133, 139),
+              primaryContainer: const Color.fromARGB(255, 161, 210, 206)),
           bottomSheetTheme: const BottomSheetThemeData(
               backgroundColor: Colors.white, surfaceTintColor: Colors.white),
           useMaterial3: true,

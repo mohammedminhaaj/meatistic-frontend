@@ -29,7 +29,7 @@ class _OtpLoginFormState extends State<OtpLoginForm> {
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(baseUrl, "/api/user/auth/login/otp/");
+      final url = getUri("/api/user/auth/login/otp/");
       http
           .post(url,
               headers: requestHeader,

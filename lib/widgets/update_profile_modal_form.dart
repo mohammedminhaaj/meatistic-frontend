@@ -36,7 +36,7 @@ class _UpdateProfileModalFormState
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(baseUrl, "/api/user/auth/update-profile/");
+      final url = getUri("/api/user/auth/update-profile/");
       Map<String, String> jsonData = {"username": _username};
       final Store store = box.get("storeObj", defaultValue: Store())!;
       final String authToken = store.authToken;
@@ -61,7 +61,7 @@ class _UpdateProfileModalFormState
             if (data.containsKey("errors")) {
               _errorDict = data["errors"];
             } else {
-              //Putting error under username field is something goes wrong outside form context
+              //Putting error under username field if something goes wrong outside form context
               _errorDict.addAll({
                 "username": ["Something went wrong!"]
               });

@@ -8,8 +8,13 @@ class HomeScreenBuilderNotifier extends StateNotifier<HomeScreenBuilder> {
     state = state.copyWith(homeScreenUpdated: homeScreenUpdated);
   }
 
+  void setPendingOrders(bool pendingOrders) {
+    state = state.copyWith(pendingOrder: pendingOrders);
+  }
+
   void updateHomeScreen(
       bool homeScreenUpdated,
+      bool pendingOrder,
       List<String> carouselImages,
       List<dynamic> allProducts,
       List<dynamic> categories,
@@ -19,6 +24,7 @@ class HomeScreenBuilderNotifier extends StateNotifier<HomeScreenBuilder> {
       List<dynamic> topRated) {
     state = state.copyWith(
         homeScreenUpdated: homeScreenUpdated,
+        pendingOrder: pendingOrder,
         carouselImages: carouselImages,
         allProducts: allProducts,
         categories: categories,

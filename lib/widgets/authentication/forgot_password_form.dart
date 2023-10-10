@@ -31,7 +31,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(baseUrl, "/api/user/auth/forgot-password/");
+      final url = getUri("/api/user/auth/forgot-password/");
       http
           .post(url,
               headers: requestHeader,

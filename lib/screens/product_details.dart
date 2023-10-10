@@ -13,6 +13,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:meatistic/widgets/quantity_count.dart';
+import 'package:meatistic/widgets/review_modal.dart';
+import 'package:meatistic/widgets/vendor_details_modal.dart';
 
 class ProductDetail extends ConsumerStatefulWidget {
   const ProductDetail(
@@ -87,6 +89,9 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
         processingCart = false;
       });
     }).onError((error, stackTrace) {
+      setState(() {
+        processingCart = false;
+      });
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Something went wrong!")));
@@ -102,8 +107,7 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      final url =
-          Uri.https(baseUrl, "/api/product/get-product/${widget.name}/");
+      final url = getUri("/api/product/get-product/${widget.name}/");
       final Store store = box.get("storeObj", defaultValue: Store())!;
       final String token = store.authToken;
       http.get(url, headers: getAuthorizationHeaders(token)).then((response) {
@@ -204,22 +208,58 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  TextButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.location_on_rounded,
-                                        color: Colors.grey,
-                                      ),
-                                      label: Text(
-                                        product.vendor.displayName,
-                                        style: const TextStyle(
-                                          fontSize: 15,
+                                  Flexible(
+                                    child: TextButton.icon(
+                                        onPressed: () => showModalBottomSheet(
+                                              context: context,
+                                              builder: (context) =>
+                                                  VendorDetailsModal(
+                                                      vendor: product.vendor),
+                                            ),
+                                        icon: const Icon(
+                                          Icons.location_on_rounded,
                                           color: Colors.grey,
                                         ),
-                                      )),
+                                        label: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              product.vendor.displayName,
+                                              style: const TextStyle(
+                                                  fontSize: 15,
+                                                  color: Colors.grey,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              product.vendor.owner,
+                                              softWrap: false,
+                                              overflow: TextOverflow.fade,
+                                              maxLines: 1,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.w100,
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                  ),
                                   if (product.rating != null)
                                     TextButton.icon(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          showModalBottomSheet(
+                                            isScrollControlled: true,
+                                            useSafeArea: true,
+                                            context: context,
+                                            builder: (context) => ReviewModal(
+                                                getUrl:
+                                                    "/api/product/get-feedbacks/",
+                                                queryParam: {
+                                                  "product": product.name
+                                                }),
+                                          );
+                                        },
                                         icon: Icon(
                                           Icons.star_rounded,
                                           color: Colors.amber[500],
@@ -445,7 +485,7 @@ class _ProductDetailState extends ConsumerState<ProductDetail> {
             Expanded(
               child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       foregroundColor: Colors.white,
                       backgroundColor: isLoading ||
                               processingCart ||

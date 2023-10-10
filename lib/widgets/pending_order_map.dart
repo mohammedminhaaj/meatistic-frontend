@@ -9,22 +9,23 @@ class PendingOrderMap extends StatefulWidget {
       {super.key,
       required this.orderLatitude,
       required this.orderLongitude,
-      required this.vendorLtLn});
+      required this.vendorLatitude,
+      required this.vendorLongitude});
 
   final String orderLatitude;
   final String orderLongitude;
-  final List<List<double>> vendorLtLn;
+  final double vendorLatitude;
+  final double vendorLongitude;
 
   @override
   State<PendingOrderMap> createState() => _PendingOrderMapState();
 }
 
 class _PendingOrderMapState extends State<PendingOrderMap> {
-  late final double lt;
-  late final double ln;
+  late final double orderLt;
+  late final double orderLn;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
-  late final List<List<double>> allCoordinates;
   final Set<Marker> markers = {};
 
   BitmapDescriptor homeMarkerIcon =
@@ -60,43 +61,41 @@ class _PendingOrderMapState extends State<PendingOrderMap> {
   @override
   void initState() {
     super.initState();
-    lt = double.parse(widget.orderLatitude);
-    ln = double.parse(widget.orderLongitude);
+    orderLt = double.parse(widget.orderLatitude);
+    orderLn = double.parse(widget.orderLongitude);
     addHomeIcon();
     addVendorIcon();
-    allCoordinates = [
-      ...widget.vendorLtLn,
-      [lt, ln]
-    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    for (final ltln in widget.vendorLtLn) {
-      markers.add(Marker(
-          markerId: MarkerId('$ltln'),
-          icon: vendorMarkerIcon,
-          position: LatLng(ltln[0], ltln[1])));
-    }
+    markers.add(Marker(
+        markerId: const MarkerId('vendorPosition'),
+        icon: vendorMarkerIcon,
+        position: LatLng(widget.vendorLatitude, widget.vendorLongitude)));
+
     markers.add(Marker(
         infoWindow:
             const InfoWindow(title: "Your order will be delivered here."),
         markerId: const MarkerId('orderPosition'),
         icon: homeMarkerIcon,
-        position: LatLng(lt, ln)));
+        position: LatLng(orderLt, orderLn)));
 
     return SizedBox(
       width: double.infinity,
       height: MediaQuery.of(context).size.height * .60,
       child: GoogleMap(
-        initialCameraPosition: CameraPosition(target: LatLng(lt, ln), zoom: 16),
+        initialCameraPosition:
+            CameraPosition(target: LatLng(orderLt, orderLn), zoom: 16),
         onMapCreated: (controller) {
           _controller.complete(controller);
           controller.showMarkerInfoWindow(const MarkerId('orderPosition'));
           WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
             Future.delayed(const Duration(milliseconds: 2000), () {
               controller.animateCamera(CameraUpdate.newLatLngBounds(
-                  getLatLngBounds(allCoordinates), 40.0));
+                  getLatLngBounds(orderLt, orderLn, widget.vendorLatitude,
+                      widget.vendorLongitude),
+                  40.0));
               controller.hideMarkerInfoWindow(const MarkerId('orderPosition'));
             });
           });

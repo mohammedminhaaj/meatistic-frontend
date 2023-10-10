@@ -60,7 +60,7 @@ class VendorCard extends StatelessWidget {
                             width: 5,
                           ),
                           Text(
-                            "$rating",
+                            rating!.toStringAsFixed(1),
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],

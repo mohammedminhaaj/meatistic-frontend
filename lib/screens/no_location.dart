@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/models/user.dart';
 import 'package:meatistic/providers/user_location_provider.dart';
 import 'package:meatistic/screens/landing_page.dart';
@@ -27,7 +28,11 @@ class NoLocation extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/no-location.png"),
+            SvgPicture.asset(
+              "assets/images/no-location.svg",
+              height: 250,
+              width: 250,
+            ),
             const SizedBox(
               height: 20,
             ),

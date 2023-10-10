@@ -4,9 +4,9 @@ import 'package:meatistic/widgets/elevated_container.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PendingOrderVendorDetails extends StatelessWidget {
-  const PendingOrderVendorDetails({super.key, required this.vendorList});
+  const PendingOrderVendorDetails({super.key, required this.vendor});
 
-  final List<Vendor> vendorList;
+  final Vendor vendor;
 
   @override
   Widget build(BuildContext context) {
@@ -28,61 +28,50 @@ class PendingOrderVendorDetails extends StatelessWidget {
             "Vendor Details",
             style: TextStyle(fontSize: 17),
           ),
-          children: vendorList
-              .map<Widget>((element) => Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  element.displayName,
-                                  style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                ),
-                                Text(
-                                  element.address,
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w100),
-                                )
-                              ],
-                            ),
+                          Text(
+                            vendor.displayName,
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary),
                           ),
-                          const SizedBox(
-                            width: 20,
-                          ),
-                          IconButton(
-                              onPressed: () async {
-                                final url =
-                                    Uri(scheme: 'tel', path: element.contact);
-                                if (await canLaunchUrl(url)) {
-                                  launchUrl(url);
-                                }
-                              },
-                              icon: Icon(
-                                Icons.phone_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                              ))
+                          Text(
+                            vendor.address,
+                            style: const TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.w100),
+                          )
                         ],
                       ),
-                      Visibility(
-                        visible: vendorList.indexOf(element) !=
-                            vendorList.length - 1,
-                        child: const Divider(
-                          height: 20,
-                        ),
-                      ),
-                    ],
-                  ))
-              .toList(),
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    IconButton(
+                        onPressed: () async {
+                          final url = Uri(scheme: 'tel', path: vendor.contact);
+                          if (await canLaunchUrl(url)) {
+                            launchUrl(url);
+                          }
+                        },
+                        icon: Icon(
+                          Icons.phone_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ))
+                  ],
+                ),
+              ],
+            )
+          ],
         ),
       ),
     );

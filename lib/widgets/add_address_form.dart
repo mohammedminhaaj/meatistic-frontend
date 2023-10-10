@@ -57,11 +57,9 @@ class _AddAddressFormState extends ConsumerState<AddAddressForm> {
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(
-          baseUrl,
-          widget.id != null
-              ? "/api/user/edit-user-location/${widget.id}/"
-              : "/api/user/add-user-location/");
+      final url = getUri(widget.id != null
+          ? "/api/user/edit-user-location/${widget.id}/"
+          : "/api/user/add-user-location/");
       final Store store = box.get("storeObj", defaultValue: Store())!;
       final String authToken = store.authToken;
       http

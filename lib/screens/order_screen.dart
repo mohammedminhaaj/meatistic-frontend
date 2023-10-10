@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meatistic/models/order.dart';
 import 'package:meatistic/models/store.dart';
+import 'package:meatistic/providers/home_screen_builder_provider.dart';
 import 'package:meatistic/providers/order_provider.dart';
 import 'package:meatistic/screens/pending_order_screen.dart';
 import 'package:meatistic/screens/previous_order_screen.dart';
@@ -44,7 +45,7 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
     if (isLoading) {
       final Store store = box.get("storeObj", defaultValue: Store())!;
       final String authToken = store.authToken;
-      final Uri url = Uri.https(baseUrl, "/api/order/get-orders/");
+      final Uri url = getUri("/api/order/get-orders/");
       http
           .get(url, headers: getAuthorizationHeaders(authToken))
           .then((response) {
@@ -55,6 +56,11 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
               const SnackBar(content: Text("Something went wrong")));
         } else {
           ref.read(orderProvider.notifier).setAllOrders(data);
+          if (data["pending"].isEmpty) {
+            ref
+                .read(homeScreenBuilderProvider.notifier)
+                .setPendingOrders(false);
+          }
         }
         setState(() {
           isLoading = false;
@@ -79,6 +85,10 @@ class _OrderScreenState extends ConsumerState<OrderScreen> {
             .updatePendingOrderStatus(data["order_id"], data["status"]);
       });
     } else if (allOrders.pendingOrders.isEmpty && channel != null) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        ref.read(homeScreenBuilderProvider.notifier).setPendingOrders(false);
+      });
+
       channel!.sink.close();
     }
 

@@ -38,6 +38,10 @@ class Store {
   @HiveField(7, defaultValue: false)
   bool fcmTokenStored;
 
+  //used to store current user's mobile number
+  @HiveField(8, defaultValue: "")
+  String mobileNumber;
+
   Store(
       {this.authToken = "",
       this.onboardingCompleted = false,
@@ -46,5 +50,6 @@ class Store {
       this.savedAddresses = const [],
       this.userEmail = "",
       this.preferredPaymentMode = 0,
-      this.fcmTokenStored = false});
+      this.fcmTokenStored = false,
+      this.mobileNumber = ""});
 }

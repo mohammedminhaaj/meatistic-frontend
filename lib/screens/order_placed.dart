@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meatistic/providers/home_screen_builder_provider.dart';
 import 'package:meatistic/screens/landing_page.dart';
 
-class OrderPlaced extends StatelessWidget {
+class OrderPlaced extends ConsumerWidget {
   const OrderPlaced({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Future.delayed(3000.ms, () {
+      ref.read(homeScreenBuilderProvider.notifier).setPendingOrders(true);
       Navigator.of(context, rootNavigator: true).pushReplacement(
         MaterialPageRoute(
             builder: (context) => const LandingPage(

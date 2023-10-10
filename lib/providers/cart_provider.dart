@@ -50,6 +50,20 @@ class CartNotifier extends StateNotifier<List<Cart>> {
       return Future(() => null);
     }
 
+    // Check if the item is from a different vendor
+    if (state.any((element) =>
+        element.product.vendor.displayName != product.vendor.displayName)) {
+      final String currentVendorName = state[0].product.vendor.displayName;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(
+            duration: const Duration(seconds: 5),
+            content: Text(
+                "Items from '$currentVendorName' are already present in your cart. Please remove them first and then add again."),
+            action: SnackBarAction(label: "Remove", onPressed: deleteCartAll)));
+      return Future(() => null);
+    }
+
     late final Uri url;
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
@@ -63,7 +77,7 @@ class CartNotifier extends StateNotifier<List<Cart>> {
             selectedQuantity: selectedQuantity,
             quantityCount: quantityCount)
       ];
-      url = Uri.https(baseUrl, "/api/cart/edit-cart/${product.name}/");
+      url = getUri("/api/cart/edit-cart/${product.name}/");
     } else {
       //add the item if it does not exists
       state = [
@@ -73,7 +87,7 @@ class CartNotifier extends StateNotifier<List<Cart>> {
             selectedQuantity: selectedQuantity,
             quantityCount: quantityCount)
       ];
-      url = Uri.https(baseUrl, "/api/cart/add-cart/");
+      url = getUri("/api/cart/add-cart/");
     }
     return http.post(url,
         headers: getAuthorizationHeaders(authToken),
@@ -91,7 +105,7 @@ class CartNotifier extends StateNotifier<List<Cart>> {
           element.selectedQuantity.id != selectedQuantity.id)
     ];
 
-    final url = Uri.https(baseUrl, "/api/cart/delete-cart/");
+    final url = getUri("/api/cart/delete-cart/");
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
     http.delete(url,
@@ -101,19 +115,15 @@ class CartNotifier extends StateNotifier<List<Cart>> {
         }));
   }
 
-  void deleteUsingVendorList(List<dynamic> vendorList) {
-    state = [
-      ...state.where(
-          (element) => !vendorList.contains(element.product.vendor.displayName))
-    ];
-    final url = Uri.https(baseUrl, "/api/cart/delete-cart/vendor-list/");
+  void deleteCartAll() {
+    clearCart();
+    final url = getUri("/api/cart/delete-cart/all/");
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
-    http.delete(url,
-        headers: getAuthorizationHeaders(authToken),
-        body: json.encode({
-          "vendor_list": vendorList,
-        }));
+    http.delete(
+      url,
+      headers: getAuthorizationHeaders(authToken),
+    );
   }
 
   void modifyQuantityCount(Modifier modifier, String productName) {

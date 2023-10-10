@@ -33,7 +33,7 @@ class _ResendOtpButtonState extends State<ResendOtpButton> {
       _enableButton = false;
       isLoading = true;
     });
-    final url = Uri.https(baseUrl, "/api/user/auth/login/otp/");
+    final url = getUri("/api/user/auth/login/otp/");
     http
         .post(url,
             headers: requestHeader,

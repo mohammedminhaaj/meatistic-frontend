@@ -10,14 +10,15 @@ import 'dart:convert';
 import 'package:meatistic/settings.dart';
 
 class OfferSection extends ConsumerStatefulWidget {
-  const OfferSection({
-    super.key,
-    this.appliedCoupon,
-    required this.total,
-  });
+  const OfferSection(
+      {super.key,
+      this.appliedCoupon,
+      required this.total,
+      required this.currentVendor});
 
   final Coupon? appliedCoupon;
   final double total;
+  final String currentVendor;
 
   @override
   ConsumerState<OfferSection> createState() => _OfferSectionState();
@@ -49,7 +50,7 @@ class _OfferSectionState extends ConsumerState<OfferSection> {
       isLoading = true;
     });
 
-    final Uri url = Uri.https(baseUrl, "/api/cart/verify-coupon/");
+    final Uri url = getUri("/api/cart/verify-coupon/");
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
     http
@@ -86,7 +87,7 @@ class _OfferSectionState extends ConsumerState<OfferSection> {
   @override
   Widget build(BuildContext context) {
     final bool couponHasErrors = widget.appliedCoupon != null &&
-        widget.appliedCoupon!.hasErrors(widget.total);
+        widget.appliedCoupon!.hasErrors(widget.total, widget.currentVendor);
     return widget.appliedCoupon != null
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,

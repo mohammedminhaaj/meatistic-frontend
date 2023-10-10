@@ -75,7 +75,7 @@ class _CarouselState extends ConsumerState<Carousel> {
   }
 
   Widget _buildPageItem(int index, String carouselImageUrl) {
-    final imageUrl = Uri.https(baseUrl, carouselImageUrl).toString();
+    final imageUrl = getUri(carouselImageUrl).toString();
     return InkWell(
       borderRadius: BorderRadius.circular(25),
       onTapDown: (_) {

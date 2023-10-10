@@ -41,7 +41,7 @@ class _LoginFormState extends State<LoginForm> {
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(baseUrl, "/api/user/auth/login/credential/");
+      final url = getUri("/api/user/auth/login/credential/");
       http
           .post(url,
               headers: requestHeader,
@@ -70,7 +70,8 @@ class _LoginFormState extends State<LoginForm> {
           store.username = data["username"];
           store.savedAddresses = data["saved_addresses"];
           store.userEmail = data["email"] ?? "";
-          if (store.userEmail == "" || store.username == data["mobile"]) {
+          store.mobileNumber = data["mobile"];
+          if (store.userEmail == "" || store.username == store.mobileNumber) {
             store.showUpdateProfilePopup = true;
           }
           box.put("storeObj", store);
@@ -151,6 +152,13 @@ class _LoginFormState extends State<LoginForm> {
                       },
                       child: const Text("Forgot password")),
                 ],
+              ),
+              const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "Note: By clicking on 'continue', you are agreeing to our terms & conditions and privacy policy.",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               ),
               const SizedBox(
                 height: 10,

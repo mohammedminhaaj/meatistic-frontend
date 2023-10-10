@@ -10,7 +10,7 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String imageUrl = Uri.https(baseUrl, image).toString();
+    final String imageUrl = getUri(image).toString();
 
     return Container(
       alignment: Alignment.topCenter,

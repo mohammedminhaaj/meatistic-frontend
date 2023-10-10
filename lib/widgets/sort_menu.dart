@@ -25,6 +25,7 @@ class SortMenu extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => FilterProduct(
+                        header: sortMenuList[index].name,
                         filterQuery: sortMenuList[index].filterName,
                       ),
                     ));

@@ -13,38 +13,20 @@ class DeliveryDetails extends StatelessWidget {
       required this.cartItems});
 
   final UserAddress? selectedAddress;
-  final Map<dynamic, dynamic> vendorErrors;
+  final List<dynamic> vendorErrors;
   final List<Cart> cartItems;
 
-  String getVendorString(List<dynamic> vendorList) {
-    if (vendorList.isEmpty) {
-      return '';
-    } else if (vendorList.length == 1) {
-      return vendorList[0];
-    } else {
-      var lastElement = vendorList.last;
-      return '${vendorList.sublist(0, vendorList.length - 1).join(', ')} and $lastElement';
-    }
-  }
-
   String parseVendorErrors(String forType) {
-    final List<String> vendorList = [];
-    for (final item in cartItems) {
-      if (!vendorList.contains(item.product.vendor.displayName) &&
-          vendorErrors[forType].contains(item.product.vendor.displayName)) {
-        vendorList.add(item.product.vendor.displayName);
-      }
-    }
-    final String vendorString = getVendorString(vendorList);
+    final String vendor = cartItems[0].product.vendor.displayName;
     switch (forType) {
       case "CLOSED":
         {
-          return "$vendorString ${vendorErrors[forType].length > 1 ? 'are' : 'is'} not delivering at the moment.";
+          return "$vendor is not delivering at the moment.";
         }
 
       case "UNDELIVERABLE":
         {
-          return "Items from $vendorString can't be delivered to your selected location. Please remove the items or select a different location.";
+          return "Items from $vendor can't be delivered to your selected location. Please remove the items or select a different location.";
         }
 
       default:
@@ -89,10 +71,8 @@ class DeliveryDetails extends StatelessWidget {
                 child: Text(selectedAddress == null ? "Select" : "Change"))
           ],
         ),
-        for (final key in vendorErrors.keys)
-          if (cartItems.any((element) => vendorErrors[key]
-                  .contains(element.product.vendor.displayName)) &&
-              selectedAddress != null)
+        for (final error in vendorErrors)
+          if (selectedAddress != null)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -119,7 +99,7 @@ class DeliveryDetails extends StatelessWidget {
                             color: Colors.red[300],
                           )),
                           const TextSpan(text: " "),
-                          TextSpan(text: parseVendorErrors(key))
+                          TextSpan(text: parseVendorErrors(error))
                         ]),
                       ),
                       Row(
@@ -133,8 +113,7 @@ class DeliveryDetails extends StatelessWidget {
                                   onPressed: () {
                                     ref
                                         .read(cartProvider.notifier)
-                                        .deleteUsingVendorList(
-                                            vendorErrors[key]);
+                                        .deleteCartAll();
                                   },
                                   child: const Text("Remove Items"));
                             },

@@ -76,8 +76,10 @@ class _DeliveryInstructionsState extends State<DeliveryInstructions> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop(
-                          _controller.text.isEmpty ? null : _controller.text);
+                      Navigator.of(context).pop(_controller.text.isEmpty ||
+                              _controller.text.trim() == ""
+                          ? null
+                          : _controller.text);
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,

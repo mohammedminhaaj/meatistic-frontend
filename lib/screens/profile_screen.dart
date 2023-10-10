@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meatistic/models/store.dart';
 import 'package:meatistic/widgets/profile_screen_options.dart';
@@ -9,8 +10,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Box<Store> box = Hive.box<Store>("store");
-    final Store store = box.get("storeObj", defaultValue: Store())!;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       physics: const AlwaysScrollableScrollPhysics(),
@@ -29,8 +28,8 @@ class ProfileScreen extends StatelessWidget {
                   radius: 60,
                   backgroundColor: Colors.grey,
                   child: ClipOval(
-                    child: Image.asset(
-                      "assets/images/user.jpg",
+                    child: SvgPicture.asset(
+                      "assets/images/user.svg",
                     ),
                   ),
                 ),
@@ -44,11 +43,18 @@ class ProfileScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text("Hello,", style: TextStyle(fontSize: 25)),
-                    Text(
-                      store.username,
-                      style: TextStyle(
-                          fontSize: 30,
-                          color: Theme.of(context).colorScheme.primary),
+                    ValueListenableBuilder<Box>(
+                      valueListenable: Hive.box<Store>("store").listenable(),
+                      builder: (context, value, child) {
+                        final Store store =
+                            value.get("storeObj", defaultValue: Store());
+                        return Text(
+                          store.username,
+                          style: TextStyle(
+                              fontSize: 30,
+                              color: Theme.of(context).colorScheme.primary),
+                        );
+                      },
                     ),
                   ],
                 ),

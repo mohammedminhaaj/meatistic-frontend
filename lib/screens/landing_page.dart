@@ -31,16 +31,17 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   void setupPushNotification() async {
     final fcm = FirebaseMessaging.instance;
-    final NotificationSettings settings = await fcm.getNotificationSettings();
 
     await fcm.requestPermission();
 
     final Box<Store> box = Hive.box<Store>("store");
     final Store store = box.get("storeObj", defaultValue: Store())!;
 
+    final NotificationSettings settings = await fcm.getNotificationSettings();
+
     if (settings.authorizationStatus == AuthorizationStatus.authorized &&
         !store.fcmTokenStored) {
-      final Uri url = Uri.https(baseUrl, "/api/common/add-fcm-token/");
+      final Uri url = getUri("/api/common/add-fcm-token/");
       final String authToken = store.authToken;
       http
           .post(url,
@@ -60,13 +61,16 @@ class _LandingPageState extends State<LandingPage> {
         } else {
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
-            ..showSnackBar(
-                const SnackBar(content: Text("Something went wrong")));
+            ..showSnackBar(const SnackBar(
+                content:
+                    Text("Something went wrong while allowing notifications")));
         }
       }).onError((error, stackTrace) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(const SnackBar(content: Text("Something went wrong")));
+          ..showSnackBar(const SnackBar(
+              content:
+                  Text("Something went wrong while allowing notifications")));
       });
     }
   }
@@ -117,13 +121,17 @@ class _LandingPageState extends State<LandingPage> {
         leading: Consumer(
           builder: (context, ref, child) {
             final UserLocation userLocation = ref.watch(userLocationProvider);
+
             return Container(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
-                  onPressed: userLocation.currentLocation != null
-                      ? _onClickLocation
-                      : () {},
-                  icon: const Icon(Icons.gps_fixed_rounded),
+                  onPressed: _onClickLocation,
+                  icon: Icon(
+                    Icons.gps_fixed_rounded,
+                    color: userLocation.currentLocation == null
+                        ? Colors.grey
+                        : null,
+                  ),
                   label: userLocation.currentLocation != null
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -169,7 +177,9 @@ class _LandingPageState extends State<LandingPage> {
                       : const SizedBox(
                           height: 14,
                           width: 14,
-                          child: CircularProgressIndicator())),
+                          child: CircularProgressIndicator(
+                            color: Colors.grey,
+                          ))),
             );
           },
         ),
@@ -180,6 +190,7 @@ class _LandingPageState extends State<LandingPage> {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => const FilterProduct(
                           autoFocus: true,
+                          header: "Search",
                         ),
                       ));
                     },

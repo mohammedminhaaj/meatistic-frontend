@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:meatistic/models/store.dart';
@@ -28,10 +29,19 @@ bool areProductsSame(List<dynamic> list1, List<dynamic> list2) {
 }
 
 class FilterProduct extends ConsumerStatefulWidget {
-  const FilterProduct({super.key, this.filterQuery, this.autoFocus = false});
+  const FilterProduct(
+      {super.key,
+      this.filterQuery,
+      this.vendor,
+      this.category,
+      required this.header,
+      this.autoFocus = false});
 
   final bool autoFocus;
   final String? filterQuery;
+  final String? vendor;
+  final String? category;
+  final String header;
 
   @override
   ConsumerState<FilterProduct> createState() => _FilterProductState();
@@ -52,6 +62,7 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
   bool searchingProducts = false;
   bool extendingProducts = false;
   bool endOfList = false;
+  bool noProducts = false;
 
   void handleExtendProducts() {
     if (_scrollController.position.maxScrollExtent ==
@@ -75,6 +86,9 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
     } else if (userLocation.currentLocation != null) {
       lt = userLocation.currentLocation!.latitude;
       ln = userLocation.currentLocation!.longitude;
+    } else {
+      lt = null;
+      ln = null;
     }
   }
 
@@ -98,9 +112,10 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
           "lt": lt != null ? lt.toString() : "null",
           "ln": ln != null ? ln.toString() : "null",
           "filter_by": widget.filterQuery ?? "",
+          "vendor": widget.vendor ?? "",
+          "category": widget.category ?? "",
         };
-        final Uri url =
-            Uri.https(baseUrl, "/api/product/filter-products/", queryParams);
+        final Uri url = getUri("/api/product/filter-products/", queryParams);
         final Store store = box.get("storeObj", defaultValue: Store())!;
         final String authToken = store.authToken;
         http
@@ -122,8 +137,12 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
             });
           } else if (productData == null) {
             setState(() {
-              productData = data;
-              cachedProductData = data;
+              if (data.isEmpty) {
+                noProducts = true;
+              } else {
+                productData = [...data];
+                cachedProductData = [...data];
+              }
             });
           }
           _debounceTimer!.cancel();
@@ -139,6 +158,7 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
 
     if (searchText.length < 3 &&
         productData != null &&
+        !noProducts &&
         !areProductsSame(productData!, cachedProductData) &&
         page == 1) {
       productData = [...cachedProductData];
@@ -151,66 +171,81 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
-          Padding(
+          Container(
             padding:
                 const EdgeInsets.only(top: 20, bottom: 20, right: 20, left: 5),
-            child: TextField(
-              onTapOutside: (event) {
-                FocusScope.of(context).unfocus();
-              },
-              onChanged: (value) {
-                setState(() {
-                  searchText = value;
-                  if (value.length >= 3) {
-                    searchingProducts = true;
-                  } else {
-                    searchingProducts = false;
-                  }
+            child: Column(
+              children: [
+                Text(
+                  widget.header,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 25),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  onTapOutside: (event) {
+                    FocusScope.of(context).unfocus();
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      searchText = value;
+                      if (value.length >= 3) {
+                        searchingProducts = true;
+                      } else {
+                        searchingProducts = false;
+                      }
 
-                  if (page != 1) {
-                    page = 1;
-                    endOfList = false;
-                  }
-                });
-              },
-              controller: _textEditingController,
-              decoration: InputDecoration(
-                  hintText: "What are you looking for?",
-                  icon: IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  suffixIcon: searchText.isNotEmpty
-                      ? GestureDetector(
-                          onTap: () {
-                            _textEditingController.clear();
-                            setState(() {
-                              searchText = "";
-                              if (page != 1) {
-                                page = 1;
-                                endOfList = false;
-                              }
-                              if (searchingProducts) {
-                                searchingProducts = false;
-                              }
-                              if (extendingProducts) {
-                                extendingProducts = false;
-                              }
-                            });
-                          },
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        )
-                      : null,
-                  prefixIcon: Icon(Icons.search_rounded,
-                      color: Theme.of(context).colorScheme.primary),
-                  border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15)))),
-              autofocus: widget.autoFocus,
+                      if (page != 1) {
+                        page = 1;
+                        endOfList = false;
+                      }
+                    });
+                  },
+                  controller: _textEditingController,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "What are you looking for?",
+                      icon: IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      suffixIcon: searchText.isNotEmpty
+                          ? GestureDetector(
+                              onTap: () {
+                                _textEditingController.clear();
+                                setState(() {
+                                  searchText = "";
+                                  if (page != 1) {
+                                    page = 1;
+                                    endOfList = false;
+                                  }
+                                  if (searchingProducts) {
+                                    searchingProducts = false;
+                                  }
+                                  if (extendingProducts) {
+                                    extendingProducts = false;
+                                  }
+                                });
+                              },
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : null,
+                      prefixIcon: Icon(Icons.search_rounded,
+                          color: Theme.of(context).colorScheme.primary),
+                      border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15)))),
+                  autofocus: widget.autoFocus,
+                ),
+              ],
             ),
           ),
           searchingProducts
@@ -228,15 +263,27 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             searchText.length >= 3
-                                ? Image.asset("assets/images/search.png")
-                                : const CircularProgressIndicator(),
+                                ? SvgPicture.asset(
+                                    "assets/images/search.svg",
+                                    height: 250,
+                                    width: 250,
+                                  )
+                                : noProducts
+                                    ? SvgPicture.asset(
+                                        "assets/images/empty.svg",
+                                        height: 250,
+                                        width: 250,
+                                      )
+                                    : const CircularProgressIndicator(),
                             const SizedBox(
                               height: 20,
                             ),
                             Text(
                               searchText.length >= 3
                                   ? "No results for '$searchText' found."
-                                  : "Please wait while we load some products for you...",
+                                  : noProducts
+                                      ? "Nothing to show here"
+                                      : "Please wait while we load some products for you...",
                               style: const TextStyle(fontSize: 20),
                               textAlign: TextAlign.center,
                             )
@@ -246,29 +293,56 @@ class _FilterProductState extends ConsumerState<FilterProduct> {
                     )
                   : Expanded(
                       child: GridView.count(
-                        padding: const EdgeInsets.only(bottom: 40),
+                        padding: const EdgeInsets.all(10),
                         controller: _scrollController,
                         mainAxisSpacing: 25,
+                        crossAxisSpacing: 25,
                         physics: const BouncingScrollPhysics(),
+                        childAspectRatio: 0.60,
                         crossAxisCount: 2,
                         shrinkWrap: true,
                         children: List.generate(productData!.length, (index) {
                           final Map<String, dynamic> currentProduct =
                               productData?[index];
-                          return ProductCard(
-                              image: currentProduct["image"],
-                              name: currentProduct["name"],
-                              displayName: currentProduct["display_name"],
-                              quantity: currentProduct["quantity"],
-                              price: currentProduct["price"],
-                              rating: currentProduct["rating"],
-                              originalPrice: currentProduct["original_price"]);
+                          return SizedBox(
+                            height: 280,
+                            child: ProductCard(
+                                image: currentProduct["image"],
+                                name: currentProduct["name"],
+                                vendor: currentProduct["vendor"],
+                                displayName: currentProduct["display_name"],
+                                quantityId:
+                                    currentProduct["product_quantity_id"],
+                                quantity: currentProduct["quantity"],
+                                price: currentProduct["price"],
+                                rating: currentProduct["rating"],
+                                originalPrice:
+                                    currentProduct["original_price"]),
+                          );
                         })
                             .animate(interval: 200.ms)
                             .fade(duration: 200.ms)
                             .scaleXY(duration: 200.ms),
                       ),
                     ),
+          if (extendingProducts)
+            const Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Text("Loading more products..."),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  SizedBox(
+                      height: 8,
+                      width: 60,
+                      child: LinearProgressIndicator(
+                        borderRadius: BorderRadius.all(Radius.circular(25)),
+                      ))
+                ],
+              ),
+            )
         ]),
       ),
     );

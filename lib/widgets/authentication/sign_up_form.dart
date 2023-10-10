@@ -37,7 +37,7 @@ class _SignUpFormState extends State<SignUpForm> {
         _errorDict = {};
         isLoading = true;
       });
-      final url = Uri.https(baseUrl, "/api/user/auth/sign-up/");
+      final url = getUri("/api/user/auth/sign-up/");
       http
           .post(url,
               headers: requestHeader,
@@ -68,7 +68,8 @@ class _SignUpFormState extends State<SignUpForm> {
           store.username = data["username"];
           store.savedAddresses = data["saved_addresses"];
           store.userEmail = data["email"] ?? "";
-          if (store.username == data["mobile"]) {
+          store.mobileNumber = data["mobile"];
+          if (store.username == store.mobileNumber) {
             store.showUpdateProfilePopup = true;
           }
           box.put("storeObj", store);
@@ -204,7 +205,17 @@ class _SignUpFormState extends State<SignUpForm> {
               if (_errorDict.containsKey("confirm_password"))
                 FormError(errors: _errorDict["confirm_password"]),
               const SizedBox(
-                height: 20,
+                height: 10,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  "Note: By clicking on 'continue', you are agreeing to our terms & conditions and privacy policy.",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
               ),
               ElevatedButton.icon(
                   style: ButtonStyle(

@@ -9,6 +9,7 @@ import 'package:meatistic/models/user.dart';
 import 'package:meatistic/providers/cart_provider.dart';
 import 'package:meatistic/providers/coupon_provider.dart';
 import 'package:meatistic/providers/user_location_provider.dart';
+import 'package:meatistic/screens/filter_product.dart';
 import 'package:meatistic/settings.dart';
 import 'package:meatistic/widgets/bill_summary.dart';
 import 'package:meatistic/widgets/cart_item.dart';
@@ -16,6 +17,7 @@ import 'package:meatistic/widgets/cart_section.dart';
 import 'package:meatistic/widgets/checkout_overlay.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:meatistic/widgets/delivery_details.dart';
 import 'package:meatistic/widgets/delivery_instructions.dart';
@@ -30,8 +32,10 @@ class CartScreen extends ConsumerStatefulWidget {
 
 class _CartScreenState extends ConsumerState<CartScreen> {
   bool isLoading = true;
+  double? _lt;
+  double? _ln;
   final Box<Store> box = Hive.box<Store>("store");
-  Map<dynamic, dynamic> vendorErrors = {};
+  List<dynamic> vendorErrors = [];
   double deliveryCharge = 0.0;
   final ScrollController _scrollController = ScrollController();
   String? deliveryInstructions;
@@ -58,14 +62,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           total, subTotalPrice, deliveryCharge);
     }
     if (isLoading) {
-      final Uri url = Uri.https(baseUrl, "/api/cart/get-cart/", {
-        'lt': (userLocation.selectedLocation?.latitude ??
-                userLocation.currentLocation?.latitude)
-            .toString(),
-        'ln': (userLocation.selectedLocation?.longitude ??
-                userLocation.currentLocation?.longitude)
-            .toString()
-      });
+      _lt = userLocation.selectedLocation?.latitude ??
+          userLocation.currentLocation?.latitude;
+      _ln = userLocation.selectedLocation?.longitude ??
+          userLocation.currentLocation?.longitude;
+      final Uri url = getUri(
+          "/api/cart/get-cart/", {'lt': _lt.toString(), 'ln': _ln.toString()});
       final Store store = box.get("storeObj", defaultValue: Store())!;
       final String authToken = store.authToken;
       http
@@ -96,15 +98,24 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : cartItems.isEmpty
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset("assets/images/empty-cart.png"),
-                    const Text(
-                      "Your cart is empty",
-                      style: TextStyle(fontSize: 20),
-                    )
-                  ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        "assets/images/empty-cart.svg",
+                        height: 250,
+                        width: 250,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text(
+                        "Your cart is empty",
+                        style: TextStyle(fontSize: 20),
+                      )
+                    ],
+                  ),
                 )
               : Stack(
                   alignment: Alignment.bottomCenter,
@@ -149,7 +160,14 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   InkWell(
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(25)),
-                                    onTap: () {},
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const FilterProduct(
+                                                    header: "All",
+                                                  )));
+                                    },
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -197,11 +215,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                                       deliveryInstructions,
                                                 );
                                               });
-                                      if (instructions != null) {
-                                        setState(() {
-                                          deliveryInstructions = instructions;
-                                        });
-                                      }
+
+                                      setState(() {
+                                        deliveryInstructions = instructions;
+                                      });
                                     },
                                     child: Row(
                                       mainAxisAlignment:
@@ -282,9 +299,12 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               CartSection(
                                   header: "Offers",
                                   child: OfferSection(
-                                    appliedCoupon: appliedCoupon,
-                                    total: total,
-                                  )),
+                                      appliedCoupon: appliedCoupon,
+                                      total: total,
+                                      currentVendor: cartItems[0]
+                                          .product
+                                          .vendor
+                                          .displayName)),
                               CartSection(
                                   header: "Bill Summary",
                                   child: BillSummary(
@@ -304,19 +324,15 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       deliveryInstructions: deliveryInstructions,
                       total: total - discountAmount,
                       couponCode: appliedCoupon != null &&
-                              !appliedCoupon.hasErrors(total)
+                              !appliedCoupon.hasErrors(total,
+                                  cartItems[0].product.vendor.displayName)
                           ? appliedCoupon.code
                           : null,
                       scrollController: _scrollController,
                       hasErrors: userLocation.selectedLocation == null ||
-                          (vendorErrors.containsKey("CLOSED") &&
-                              cartItems.any((element) => vendorErrors["CLOSED"]
-                                  .contains(
-                                      element.product.vendor.displayName))) ||
-                          (vendorErrors.containsKey("UNDELIVERABLE") &&
-                              cartItems.any((element) =>
-                                  vendorErrors["UNDELIVERABLE"].contains(
-                                      element.product.vendor.displayName))),
+                          vendorErrors.isNotEmpty,
+                      currentLt: _lt,
+                      currentLn: _ln,
                     )
                   ],
                 )

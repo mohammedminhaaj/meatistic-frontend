@@ -18,7 +18,6 @@ class OrderFeedback extends StatefulWidget {
 }
 
 class _OrderFeedbackState extends State<OrderFeedback> {
-  final Set<String> vendorNames = {};
   late final ValueNotifier<Map<String, dynamic>> feedback;
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
   final Box<Store> box = Hive.box<Store>("store");
@@ -32,9 +31,6 @@ class _OrderFeedbackState extends State<OrderFeedback> {
   @override
   void initState() {
     super.initState();
-    for (final cart in widget.order.cart) {
-      vendorNames.add(cart.product.vendor.displayName);
-    }
     feedback = ValueNotifier<Map<String, dynamic>>({
       "order": widget.order.orderId,
       "item_feedbacks": {},
@@ -123,27 +119,23 @@ class _OrderFeedbackState extends State<OrderFeedback> {
               const SizedBox(
                 height: 10,
               ),
-              for (int i = 0; i < vendorNames.length; i++)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      vendorNames.elementAt(i),
-                      style: const TextStyle(fontSize: 17),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    FeedbackSection(
-                      addFeedback: addVendorFeedback,
-                      feedbackFor: vendorNames.elementAt(i),
-                    ),
-                    if (i != vendorNames.length - 1)
-                      const Divider(
-                        height: 20,
-                      )
-                  ],
-                )
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.order.cart[0].product.vendor.displayName,
+                    style: const TextStyle(fontSize: 17),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  FeedbackSection(
+                    addFeedback: addVendorFeedback,
+                    feedbackFor:
+                        widget.order.cart[0].product.vendor.displayName,
+                  ),
+                ],
+              )
             ],
           )),
         ]),
@@ -165,8 +157,7 @@ class _OrderFeedbackState extends State<OrderFeedback> {
                                 "Please rate atleast one section before submitting")));
                       return;
                     }
-                    final Uri url =
-                        Uri.https(baseUrl, "/api/order/add-order-feedback/");
+                    final Uri url = getUri("/api/order/add-order-feedback/");
                     final Store store =
                         box.get("storeObj", defaultValue: Store())!;
                     final String authToken = store.authToken;
@@ -202,8 +193,12 @@ class _OrderFeedbackState extends State<OrderFeedback> {
                     ? Colors.grey
                     : Theme.of(context).colorScheme.primary),
             child: loadingValue
-                ? const SizedBox(
-                    height: 16, width: 16, child: CircularProgressIndicator())
+                ? SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(
+                      color: loadingValue ? Colors.white : null,
+                    ))
                 : const Text(
                     "Submit",
                     style: TextStyle(fontSize: 17),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/screens/otp_login.dart';
 import 'package:meatistic/widgets/authentication/authentication_footer.dart';
 import 'package:meatistic/widgets/authentication/login_form.dart';
@@ -19,11 +20,10 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/login.png",
-                  colorBlendMode: BlendMode.multiply,
-                  width: 300,
-                  height: 300,
+                SvgPicture.asset(
+                  "assets/images/login.svg",
+                  width: 250,
+                  height: 250,
                 ),
                 const Text(
                   "Login",

@@ -20,13 +20,17 @@ class CheckoutOverlay extends ConsumerStatefulWidget {
       required this.scrollController,
       required this.hasErrors,
       this.deliveryInstructions,
-      this.couponCode});
+      this.couponCode,
+      required this.currentLt,
+      required this.currentLn});
 
   final double total;
   final ScrollController scrollController;
   final bool hasErrors;
   final String? deliveryInstructions;
   final String? couponCode;
+  final double? currentLt;
+  final double? currentLn;
 
   @override
   ConsumerState<CheckoutOverlay> createState() => _CheckoutOverlayState();
@@ -43,7 +47,10 @@ class _CheckoutOverlayState extends ConsumerState<CheckoutOverlay> {
     switch (paymentMode) {
       case PaymentMode.cash:
         {
-          final Uri url = Uri.https(baseUrl, "/api/order/place-order/cash/");
+          final Uri url = getUri("/api/order/place-order/cash/", {
+            "lt": widget.currentLt.toString(),
+            "ln": widget.currentLn.toString()
+          });
           isLoading.value = true;
           http
               .post(url,

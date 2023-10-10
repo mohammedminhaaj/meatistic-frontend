@@ -6,8 +6,13 @@ import 'package:meatistic/providers/cart_provider.dart';
 import 'package:meatistic/providers/coupon_provider.dart';
 import 'package:meatistic/providers/home_screen_builder_provider.dart';
 import 'package:meatistic/providers/user_location_provider.dart';
+import 'package:meatistic/screens/about_us.dart';
+import 'package:meatistic/screens/app_settings.dart';
+import 'package:meatistic/screens/edit_profile.dart';
 import 'package:meatistic/screens/login.dart';
+import 'package:meatistic/screens/my_reviews.dart';
 import 'package:meatistic/settings.dart';
+import 'package:meatistic/widgets/contact_us.dart';
 import 'package:meatistic/widgets/profile_option.dart';
 import 'package:meatistic/widgets/profile_option_container.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +25,37 @@ class ProfileOptions extends ConsumerWidget {
     final Box<Store> box = Hive.box<Store>("store");
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
+
+    void onClickMyReviews() {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => const MyReviews(),
+      ));
+    }
+
+    void onClickEditProfile() {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => const EditProfileScreen(),
+      ));
+    }
+
+    void onClickAppSettings() {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => const AppSettingsScreen(),
+      ));
+    }
+
+    void onClickSupport() {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) => const ContactUs(),
+      );
+    }
+
+    void onClickAboutUs() {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => const AboutUs(),
+      ));
+    }
 
     void onClickLogout() {
       showDialog(
@@ -55,8 +91,7 @@ class ProfileOptions extends ConsumerWidget {
                             store.preferredPaymentMode = 0;
                             store.fcmTokenStored = false;
                             box.put("storeObj", store);
-                            final url =
-                                Uri.https(baseUrl, "/api/user/auth/logout/");
+                            final url = getUri("/api/user/auth/logout/");
                             http.post(
                               url,
                               headers: getAuthorizationHeaders(authToken),
@@ -80,29 +115,29 @@ class ProfileOptions extends ConsumerWidget {
           ProfileOption(
             label: "My Reviews",
             icon: Icons.reviews_rounded,
-            onTap: () {},
+            onTap: onClickMyReviews,
           ),
           ProfileOption(
             label: "Edit Profile",
             icon: Icons.edit_square,
-            onTap: () {},
+            onTap: onClickEditProfile,
           ),
         ]),
         ProfileOptionContainer(header: "More", children: [
           ProfileOption(
             label: "App Settings",
             icon: Icons.settings_rounded,
-            onTap: () {},
+            onTap: onClickAppSettings,
           ),
           ProfileOption(
             label: "Support",
             icon: Icons.support_agent_rounded,
-            onTap: () {},
+            onTap: onClickSupport,
           ),
           ProfileOption(
             label: "About Us",
             icon: Icons.stars_rounded,
-            onTap: () {},
+            onTap: onClickAboutUs,
           ),
           ProfileOption(
             label: "Logout",

@@ -97,3 +97,24 @@ class AllOrders {
     );
   }
 }
+
+class OrderFeedback {
+  const OrderFeedback(
+      {required this.username,
+      required this.rating,
+      required this.comment,
+      required this.createdAt});
+
+  final String username;
+  final int rating;
+  final String? comment;
+  final String createdAt;
+
+  factory OrderFeedback.fromJson(Map<dynamic, dynamic> json) {
+    return OrderFeedback(
+        username: json["user"],
+        rating: json["rating"],
+        createdAt: json["posted_on"],
+        comment: json["comment"]);
+  }
+}

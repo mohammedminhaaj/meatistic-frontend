@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/widgets/authentication/authentication_footer.dart';
 import 'package:meatistic/widgets/authentication/verify_otp_form.dart';
 
@@ -22,9 +23,10 @@ class VerifyOtpScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/verify-otp.png",
-                  colorBlendMode: BlendMode.multiply,
+                SvgPicture.asset(
+                  "assets/images/verify-otp.svg",
+                  height: 250,
+                  width: 250,
                 ),
                 const Text(
                   "Verify OTP",

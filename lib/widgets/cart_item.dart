@@ -7,6 +7,7 @@ import 'package:meatistic/models/store.dart';
 import 'package:meatistic/providers/cart_provider.dart';
 import 'package:meatistic/screens/product_details.dart';
 import 'package:meatistic/settings.dart';
+import 'package:meatistic/widgets/delete_action_background.dart';
 import 'package:meatistic/widgets/quantity_count.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -18,11 +19,11 @@ class CartItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final imageUrl = Uri.https(baseUrl, cart.product.image!).toString();
+    final imageUrl = getUri(cart.product.image!).toString();
     final ValueNotifier<bool> quantityCountChanged = ValueNotifier(false);
     final Box<Store> box = Hive.box<Store>("store");
-    final url = Uri.https(
-        baseUrl, "/api/cart/edit-cart/quantity-count/${cart.product.name}/");
+    final url =
+        getUri("/api/cart/edit-cart/quantity-count/${cart.product.name}/");
     final Store store = box.get("storeObj", defaultValue: Store())!;
     final String authToken = store.authToken;
 
@@ -36,32 +37,7 @@ class CartItem extends ConsumerWidget {
           ));
         },
         direction: DismissDirection.endToStart,
-        background: Container(
-          decoration: BoxDecoration(
-              color: Colors.red[300],
-              borderRadius: const BorderRadius.all(Radius.circular(25))),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Icon(Icons.keyboard_double_arrow_left_rounded,
-                    color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "Swipe to delete",
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(Icons.delete_forever_rounded, color: Colors.white)
-              ],
-            ),
-          ),
-        ),
+        background: const DeleteActionBackground(),
         key: UniqueKey(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,7 +45,7 @@ class CartItem extends ConsumerWidget {
             InkWell(
               borderRadius: const BorderRadius.all(Radius.circular(25)),
               onTap: () {
-                final url = Uri.https(baseUrl, cart.product.image!).toString();
+                final url = getUri(cart.product.image!).toString();
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (ctx) => ProductDetail(
                         name: cart.product.name, productImage: url)));

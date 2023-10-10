@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/widgets/authentication/authentication_footer.dart';
 import 'package:meatistic/widgets/authentication/sign_up_form.dart';
 
@@ -20,9 +21,10 @@ class SignUpScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/sign-up.png",
-                  colorBlendMode: BlendMode.multiply,
+                SvgPicture.asset(
+                  "assets/images/sign-up.svg",
+                  height: 250,
+                  width: 250,
                 ),
                 const Text(
                   "Sign Up",

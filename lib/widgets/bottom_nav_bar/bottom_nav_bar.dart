@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meatistic/providers/cart_provider.dart';
+import 'package:meatistic/providers/home_screen_builder_provider.dart';
 import 'package:meatistic/widgets/bottom_nav_bar/bottom_nav_bar_item.dart';
 
-class CustomeBottomNavigationBar extends StatelessWidget {
+class CustomeBottomNavigationBar extends ConsumerWidget {
   const CustomeBottomNavigationBar(
       {super.key,
       required this.onMenuSelected,
@@ -14,7 +15,12 @@ class CustomeBottomNavigationBar extends StatelessWidget {
   final String currentScreenName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool pendingOrder = ref
+        .watch(homeScreenBuilderProvider.select((value) => value.pendingOrder));
+    final bool homeScreenUpdated = ref.watch(
+        homeScreenBuilderProvider.select((value) => value.homeScreenUpdated));
+    final int cartLength = ref.watch(cartProvider).length;
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
@@ -28,9 +34,8 @@ class CustomeBottomNavigationBar extends StatelessWidget {
                 onTap: () {
                   onMenuSelected("Home");
                 }),
-            Consumer(builder: (context, ref, child) {
-              final cartLength = ref.watch(cartProvider).length;
-              return CustomBottomNavigationBarItem(
+            if (homeScreenUpdated || currentScreenName != "Home")
+              CustomBottomNavigationBarItem(
                 icon: Icons.shopping_cart_rounded,
                 label: "Cart",
                 isSelected: currentScreenName == "Cart",
@@ -63,45 +68,55 @@ class CustomeBottomNavigationBar extends StatelessWidget {
                           ),
                         ),
                       ),
-              );
-            }),
-            CustomBottomNavigationBarItem(
-              icon: Icons.list_alt_rounded,
-              label: "Orders",
-              isSelected: currentScreenName == "Orders",
-              onTap: () {
-                onMenuSelected("Orders");
-              },
-              useStack: true,
-              // layer: Positioned(
-              //   right: 0,
-              //   bottom: 0,
-              //   child: Container(
-              //     width: 16,
-              //     height: 16,
-              //     decoration: BoxDecoration(
-              //         color: currentScreenName == "Orders"
-              //             ? Colors.white
-              //             : Theme.of(context).colorScheme.primary,
-              //         borderRadius:
-              //             const BorderRadius.all(Radius.circular(50))),
-              //   )
-              //       .animate(
-              //         onPlay: (controller) => controller.loop(period: 3000.ms),
-              //       )
-              //       .fadeOut(duration: 3000.ms, delay: 3000.ms)
-              //       .scaleXY(
-              //           begin: 0, end: 1.5, duration: 3000.ms, delay: 3000.ms),
-              // ),
-            ),
-            CustomBottomNavigationBarItem(
-                icon: Icons.person_rounded,
-                label: "Profile",
-                isSelected: currentScreenName == "Profile",
+              ),
+            if (homeScreenUpdated || currentScreenName != "Home")
+              CustomBottomNavigationBarItem(
+                icon: Icons.receipt_rounded,
+                label: "Orders",
+                isSelected: currentScreenName == "Orders",
                 onTap: () {
-                  onMenuSelected("Profile");
-                }),
-          ],
+                  onMenuSelected("Orders");
+                },
+                useStack: true,
+                layer: pendingOrder
+                    ? Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                              color: currentScreenName == "Orders"
+                                  ? Colors.white
+                                  : Theme.of(context).colorScheme.primary,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(50))),
+                        )
+                            .animate(
+                              onPlay: (controller) =>
+                                  controller.loop(period: 3000.ms),
+                            )
+                            .fadeOut(duration: 3000.ms, delay: 3000.ms)
+                            .scaleXY(
+                                begin: 0,
+                                end: 1.5,
+                                duration: 3000.ms,
+                                delay: 3000.ms),
+                      )
+                    : null,
+              ),
+            if (homeScreenUpdated || currentScreenName != "Home")
+              CustomBottomNavigationBarItem(
+                  icon: Icons.person_rounded,
+                  label: "Profile",
+                  isSelected: currentScreenName == "Profile",
+                  onTap: () {
+                    onMenuSelected("Profile");
+                  }),
+          ]
+              .animate(interval: 300.ms)
+              .fade(duration: 300.ms)
+              .moveY(duration: 300.ms, begin: 30, end: 0),
         ));
   }
 }

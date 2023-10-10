@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:location/location.dart';
 import 'package:meatistic/models/home_screen_builder.dart';
@@ -9,8 +10,9 @@ import 'package:meatistic/models/user.dart';
 import 'package:meatistic/providers/cart_provider.dart';
 import 'package:meatistic/providers/home_screen_builder_provider.dart';
 import 'package:meatistic/providers/user_location_provider.dart';
+import 'package:meatistic/screens/all_categories.dart';
+import 'package:meatistic/screens/all_vendors.dart';
 import 'package:meatistic/screens/filter_product.dart';
-import 'package:meatistic/screens/product_categories.dart';
 import 'package:meatistic/settings.dart';
 import 'package:meatistic/utils/location_services.dart';
 import 'package:meatistic/widgets/carousel.dart';
@@ -76,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     errorText:
                         "Please provide location permission on this device")));
           } else {
-            final url = Uri.https(baseUrl, "/api/common/get-home-screen/", {
+            final url = getUri("/api/common/get-home-screen/", {
               'lt': (userLocation.selectedLocation?.latitude ??
                       userLocation.currentLocation?.latitude ??
                       value["location"].latitude)
@@ -96,10 +98,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SnackBar(content: Text("Something went wrong!")));
               } else {
                 final data = json.decode(response.body);
-
                 //Update home screen state
                 ref.read(homeScreenBuilderProvider.notifier).updateHomeScreen(
                     true,
+                    data["pending_order"],
                     _decodeCarouselData(data["banner_images"]),
                     data["all_products"],
                     data["categories"],
@@ -141,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         });
       } else {
-        final url = Uri.https(baseUrl, "/api/common/get-home-screen/", {
+        final url = getUri("/api/common/get-home-screen/", {
           'lt': (userLocation.selectedLocation?.latitude ??
                   userLocation.currentLocation?.latitude)
               .toString(),
@@ -157,6 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final data = json.decode(response.body);
             ref.read(homeScreenBuilderProvider.notifier).updateHomeScreen(
                 true,
+                data["pending_order"],
                 _decodeCarouselData(data["banner_images"]),
                 data["all_products"],
                 data["categories"],
@@ -212,7 +215,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset("assets/images/no-service.png"),
+                              SvgPicture.asset(
+                                "assets/images/no-service.svg",
+                                height: 250,
+                                width: 250,
+                              ),
                               const SizedBox(
                                 height: 20,
                               ),
@@ -236,51 +243,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           header: "Categories",
                           onViewAll: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    const ProductCategories()));
+                                builder: (context) => const AllCategories()));
                           },
                           child: SizedBox(
                             height: 120,
-                            child: ListView.builder(
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: categories.length,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                final Map<String, dynamic> currentCategory =
-                                    categories[index];
+                            child: categories.isEmpty
+                                ? const Text("No Categories to display")
+                                : ListView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: categories.length,
+                                    scrollDirection: Axis.horizontal,
+                                    itemBuilder: (context, index) {
+                                      final Map<String, dynamic>
+                                          currentCategory = categories[index];
 
-                                return CategoryCard(
-                                  image: currentCategory["image"],
-                                  name: currentCategory["display_name"],
-                                );
-                              },
-                            ),
+                                      return InkWell(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(25)),
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      FilterProduct(
+                                                        category:
+                                                            currentCategory[
+                                                                "display_name"],
+                                                        header: currentCategory[
+                                                            "display_name"],
+                                                      )));
+                                        },
+                                        child: CategoryCard(
+                                          image: currentCategory["image"],
+                                          name: currentCategory["display_name"],
+                                        ),
+                                      );
+                                    },
+                                  ),
                           ),
                         ),
                         HomeScreenSection(
                             header: "Nearby Vendors",
-                            onViewAll: () {},
+                            onViewAll: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const AllVendors()));
+                            },
                             child: SizedBox(
                               height: 130,
-                              child: ListView.separated(
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(
-                                        width: 20,
-                                      ),
-                                  shrinkWrap: true,
-                                  physics: const BouncingScrollPhysics(),
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: nearbyVendors.length,
-                                  itemBuilder: (context, index) {
-                                    final Map<String, dynamic> currentVendor =
-                                        nearbyVendors[index];
-                                    return VendorCard(
-                                      index: index,
-                                      name: currentVendor["display_name"],
-                                      rating: currentVendor["rating"],
-                                      distance: currentVendor["distance"],
-                                    );
-                                  }),
+                              child: nearbyVendors.isEmpty
+                                  ? const Text("No nearby vendors available")
+                                  : ListView.separated(
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(
+                                            width: 20,
+                                          ),
+                                      shrinkWrap: true,
+                                      physics: const BouncingScrollPhysics(),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: nearbyVendors.length,
+                                      itemBuilder: (context, index) {
+                                        final Map<String, dynamic>
+                                            currentVendor =
+                                            nearbyVendors[index];
+                                        return InkWell(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(25)),
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        FilterProduct(
+                                                          vendor: currentVendor[
+                                                              "display_name"],
+                                                          header: currentVendor[
+                                                              "display_name"],
+                                                        )));
+                                          },
+                                          child: VendorCard(
+                                            index: index,
+                                            name: currentVendor["display_name"],
+                                            rating: currentVendor["rating"],
+                                            distance: currentVendor["distance"],
+                                          ),
+                                        );
+                                      }),
                             )),
                         if (featuredProducts.isNotEmpty)
                           HomeScreenSection(
@@ -288,15 +333,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onViewAll: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => const FilterProduct(
+                                        header: "Featured",
                                         filterQuery: 'is_featured',
                                       )));
                             },
                             child: SizedBox(
-                              height: 220,
-                              child: ListView.builder(
+                              height: 300,
+                              child: ListView.separated(
                                   physics: const BouncingScrollPhysics(),
                                   itemCount: featuredProducts.length,
                                   scrollDirection: Axis.horizontal,
+                                  separatorBuilder: (_, index) =>
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
                                   itemBuilder: (_, index) {
                                     final Map<String, dynamic> currentProduct =
                                         featuredProducts[index];
@@ -304,8 +354,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     return ProductCard(
                                         image: currentProduct["image"],
                                         name: currentProduct["name"],
+                                        vendor: currentProduct["vendor"],
                                         displayName:
                                             currentProduct["display_name"],
+                                        quantityId: currentProduct[
+                                            "product_quantity_id"],
                                         quantity: currentProduct["quantity"],
                                         price: currentProduct["price"],
                                         rating: currentProduct["rating"],
@@ -320,12 +373,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onViewAll: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => const FilterProduct(
+                                        header: "Top Selling",
                                         filterQuery: 'top_selling',
                                       )));
                             },
                             child: SizedBox(
-                              height: 220,
-                              child: ListView.builder(
+                              height: 300,
+                              child: ListView.separated(
+                                  separatorBuilder: (_, index) =>
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
                                   physics: const BouncingScrollPhysics(),
                                   itemCount: topSelling.length,
                                   scrollDirection: Axis.horizontal,
@@ -336,8 +394,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     return ProductCard(
                                         image: currentProduct["image"],
                                         name: currentProduct["name"],
+                                        vendor: currentProduct["vendor"],
                                         displayName:
                                             currentProduct["display_name"],
+                                        quantityId: currentProduct[
+                                            "product_quantity_id"],
                                         quantity: currentProduct["quantity"],
                                         price: currentProduct["price"],
                                         rating: currentProduct["rating"],
@@ -352,12 +413,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onViewAll: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => const FilterProduct(
+                                        header: "Top Rated",
                                         filterQuery: 'top_rated',
                                       )));
                             },
                             child: SizedBox(
-                              height: 220,
-                              child: ListView.builder(
+                              height: 300,
+                              child: ListView.separated(
+                                  separatorBuilder: (_, index) =>
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
                                   physics: const BouncingScrollPhysics(),
                                   itemCount: topRated.length,
                                   scrollDirection: Axis.horizontal,
@@ -368,8 +434,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     return ProductCard(
                                         image: currentProduct["image"],
                                         name: currentProduct["name"],
+                                        vendor: currentProduct["vendor"],
                                         displayName:
                                             currentProduct["display_name"],
+                                        quantityId: currentProduct[
+                                            "product_quantity_id"],
                                         quantity: currentProduct["quantity"],
                                         price: currentProduct["price"],
                                         rating: currentProduct["rating"],
@@ -382,29 +451,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           header: "All",
                           onViewAll: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const FilterProduct()));
+                                builder: (context) => const FilterProduct(
+                                      header: "All",
+                                    )));
                           },
                           child: SizedBox(
-                            height: 220,
-                            child: ListView.builder(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: allProducts.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (_, index) {
-                                  final Map<String, dynamic> currentProduct =
-                                      allProducts[index];
+                            height: 300,
+                            child: allProducts.isEmpty
+                                ? const Text("No items to display")
+                                : ListView.separated(
+                                    separatorBuilder: (_, index) =>
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: allProducts.length,
+                                    scrollDirection: Axis.horizontal,
+                                    itemBuilder: (_, index) {
+                                      final Map<String, dynamic>
+                                          currentProduct = allProducts[index];
 
-                                  return ProductCard(
-                                      image: currentProduct["image"],
-                                      name: currentProduct["name"],
-                                      displayName:
-                                          currentProduct["display_name"],
-                                      quantity: currentProduct["quantity"],
-                                      price: currentProduct["price"],
-                                      rating: currentProduct["rating"],
-                                      originalPrice:
-                                          currentProduct["original_price"]);
-                                }),
+                                      return ProductCard(
+                                          image: currentProduct["image"],
+                                          name: currentProduct["name"],
+                                          vendor: currentProduct["vendor"],
+                                          displayName:
+                                              currentProduct["display_name"],
+                                          quantityId: currentProduct[
+                                              "product_quantity_id"],
+                                          quantity: currentProduct["quantity"],
+                                          price: currentProduct["price"],
+                                          rating: currentProduct["rating"],
+                                          originalPrice:
+                                              currentProduct["original_price"]);
+                                    }),
                           ),
                         ),
                         const SizedBox(

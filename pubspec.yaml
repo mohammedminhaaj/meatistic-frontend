@@ -48,6 +48,8 @@ dependencies:
   web_socket_channel: ^2.4.0
   firebase_core: ^2.15.1
   firebase_messaging: ^14.6.6
+  firebase_crashlytics: ^3.3.7
+  flutter_svg: ^2.0.7
 
 dev_dependencies:
   flutter_test:

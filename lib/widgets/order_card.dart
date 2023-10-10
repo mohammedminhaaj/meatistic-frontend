@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meatistic/data/color.dart';
 import 'package:meatistic/models/order.dart';
 import 'package:meatistic/providers/order_provider.dart';
-import 'package:meatistic/screens/order_feedback.dart';
+import 'package:meatistic/screens/order_feedback.dart' as order_feedback_screen;
 import 'package:meatistic/widgets/elevated_container.dart';
 
 class OrderCard extends ConsumerStatefulWidget {
@@ -125,7 +125,8 @@ class _OrderCardState extends ConsumerState<OrderCard> {
                                     await Navigator.of(context)
                                         .push(MaterialPageRoute(
                                   builder: (context) =>
-                                      OrderFeedback(order: widget.order),
+                                      order_feedback_screen.OrderFeedback(
+                                          order: widget.order),
                                 ));
                                 if (feedbackCompletedMessage != null) {
                                   Future.microtask(() {

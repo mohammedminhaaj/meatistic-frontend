@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meatistic/widgets/authentication/authentication_footer.dart';
 import 'package:meatistic/widgets/authentication/otp_login_form.dart';
 
@@ -20,9 +21,10 @@ class OtpLoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/otp-login.png",
-                  colorBlendMode: BlendMode.multiply,
+                SvgPicture.asset(
+                  "assets/images/otp-login.svg",
+                  height: 250,
+                  width: 250,
                 ),
                 const Text(
                   "OTP Login",

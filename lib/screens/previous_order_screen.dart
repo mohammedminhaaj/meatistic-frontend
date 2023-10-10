@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meatistic/models/order.dart';
 import 'package:meatistic/models/store.dart';
@@ -83,8 +84,7 @@ class _PreviousOrderScreenState extends State<PreviousOrderScreen> {
           "page": page.toString(),
           "search_text": searchText
         };
-        final Uri url =
-            Uri.https(baseUrl, "/api/order/get-previous-orders/", queryParams);
+        final Uri url = getUri("/api/order/get-previous-orders/", queryParams);
         final Store store = box.get("storeObj", defaultValue: Store())!;
         final String authToken = store.authToken;
         http
@@ -133,7 +133,11 @@ class _PreviousOrderScreenState extends State<PreviousOrderScreen> {
         ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("assets/images/no-data.png"),
+              SvgPicture.asset(
+                "assets/images/no-data.svg",
+                height: 250,
+                width: 250,
+              ),
               const Text(
                 "Nothing to show here",
                 style: TextStyle(fontSize: 20),
@@ -209,8 +213,11 @@ class _PreviousOrderScreenState extends State<PreviousOrderScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(
-                                  child:
-                                      Image.asset("assets/images/no-data.png")),
+                                  child: SvgPicture.asset(
+                                "assets/images/no-data.svg",
+                                height: 250,
+                                width: 250,
+                              )),
                               Text(
                                 "No results for '$searchText' found",
                                 style: const TextStyle(fontSize: 20),

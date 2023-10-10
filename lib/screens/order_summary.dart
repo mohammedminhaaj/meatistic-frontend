@@ -47,8 +47,7 @@ class OrderSummary extends StatelessWidget {
                             const BorderRadius.all(Radius.circular(15)),
                         onTap: () {
                           final String url =
-                              Uri.https(baseUrl, cart.product.image!)
-                                  .toString();
+                              getUri(cart.product.image!).toString();
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => ProductDetail(
                                 name: cart.product.name, productImage: url),

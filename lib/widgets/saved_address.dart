@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meatistic/models/store.dart';
 import 'package:meatistic/models/user.dart';
@@ -54,7 +55,7 @@ class SavedAddress extends ConsumerWidget {
                             final Store store =
                                 box.get("storeObj", defaultValue: Store())!;
                             final authToken = store.authToken;
-                            final Uri url = Uri.https(baseUrl,
+                            final Uri url = getUri(
                                 "/api/user/delete-user-location/${savedAddresses[index].id}/");
                             store.savedAddresses.removeWhere((element) =>
                                 element["id"] == savedAddresses[index].id);
@@ -154,9 +155,8 @@ class SavedAddress extends ConsumerWidget {
                   return savedAddresses.isEmpty
                       ? Align(
                           child: Column(children: [
-                            Image.asset(
-                              "assets/images/empty.png",
-                              colorBlendMode: BlendMode.multiply,
+                            SvgPicture.asset(
+                              "assets/images/empty.svg",
                               height: 250,
                               width: 250,
                             ),
