@@ -1,4 +1,5 @@
-const String baseUrl = "10.0.2.2:8000";
+// const String baseUrl = "10.0.2.2:8000";
+const String baseUrl = "dev.meatistic.com";
 const String wsUrl = "ws://$baseUrl/";
 const Map<String, String> requestHeader = {
   "Content-Type": "application/json",
@@ -13,5 +14,5 @@ Map<String, String> getAuthorizationHeaders(String authToken) {
 }
 
 Uri getUri(String url, [Map<String, String>? params]) {
-  return Uri.http(baseUrl, url, params);
+  return Uri.https(baseUrl, url, params);
 }
